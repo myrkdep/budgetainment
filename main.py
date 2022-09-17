@@ -13,8 +13,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
-auth = HTTPTokenAuth('Bearer')
-token_serializer = Serializer(app.config['SECRET_KEY'], expires_in=3600)
 
 #databasemodels
 class Member(db.Model):
@@ -30,7 +28,6 @@ class Member(db.Model):
         self.password = password
         self.role = 'user'
         self.active = 0
-
 
 #auth setup
 @auth.get_user_roles
@@ -53,7 +50,8 @@ def activate():
 @auth.login_required(role=['admin', 'user'])
 @app.route('/api/login', methods=['POST'])
 def login():
-    pass
+    token = token_serializer.dumps({'username': user}).decode('utf-8')
+    return jsonify({'token': token})
 
 @auth.login_required(role=['admin', 'user'])
 @app.post('/api/add-sent', methods=['POST'])
